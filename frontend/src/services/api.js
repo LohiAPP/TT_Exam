@@ -1,124 +1,132 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const api = {
+  async handleResponse(response) {
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `API Error: ${response.status}`);
+    }
+    return response.json();
+  },
+
   async startExam(data) {
-    const response = await fetch(`${API_BASE_URL}/exam/start`, {
+    const response = await fetch(`${BASE_URL}/api/exam/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async getExams() {
-    const response = await fetch(`${API_BASE_URL}/exam`);
-    return response.json();
+    const response = await fetch(`${BASE_URL}/api/exam`);
+    return this.handleResponse(response);
   },
 
   async getQuestions(examId) {
-    const response = await fetch(`${API_BASE_URL}/questions/${examId}`);
-    return response.json();
+    const response = await fetch(`${BASE_URL}/api/questions/${examId}`);
+    return this.handleResponse(response);
   },
 
   async submitExam(data) {
-    const response = await fetch(`${API_BASE_URL}/exam/submit`, {
+    const response = await fetch(`${BASE_URL}/api/exam/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   // Admin APIs
   async getDashboardStats() {
-    const response = await fetch(`${API_BASE_URL}/exam/stats`);
-    return response.json();
+    const response = await fetch(`${BASE_URL}/api/exam/stats`);
+    return this.handleResponse(response);
   },
 
   async getResults(examId) {
-    const response = await fetch(`${API_BASE_URL}/results/${examId}`);
-    return response.json();
+    const response = await fetch(`${BASE_URL}/api/results/${examId}`);
+    return this.handleResponse(response);
   },
 
   async createExam(data) {
-    const response = await fetch(`${API_BASE_URL}/exam`, {
+    const response = await fetch(`${BASE_URL}/api/exam`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async updateExam(id, data) {
-    const response = await fetch(`${API_BASE_URL}/exam/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/exam/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async deleteExam(id) {
-    const response = await fetch(`${API_BASE_URL}/exam/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/exam/${id}`, {
       method: 'DELETE'
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async updateResult(id, data) {
-    const response = await fetch(`${API_BASE_URL}/results/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/results/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async deleteResult(id) {
-    const response = await fetch(`${API_BASE_URL}/results/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/results/${id}`, {
       method: 'DELETE'
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async createQuestion(data) {
-    const response = await fetch(`${API_BASE_URL}/questions`, {
+    const response = await fetch(`${BASE_URL}/api/questions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async importQuestions(examId, file) {
     const formData = new FormData();
     formData.append('examId', examId);
     formData.append('file', file);
-    const response = await fetch(`${API_BASE_URL}/questions/import`, {
+    const response = await fetch(`${BASE_URL}/api/questions/import`, {
       method: 'POST',
       body: formData
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async updateQuestion(id, data) {
-    const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/questions/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   async deleteQuestion(id) {
-    const response = await fetch(`${API_BASE_URL}/questions/${id}`, {
+    const response = await fetch(`${BASE_URL}/api/questions/${id}`, {
       method: 'DELETE'
     });
-    return response.json();
+    return this.handleResponse(response);
   },
 
   getExportUrl(examId) {
-    return `${API_BASE_URL}/results/${examId}/export`;
+    return `${BASE_URL}/api/results/${examId}/export`;
   }
 };
 
