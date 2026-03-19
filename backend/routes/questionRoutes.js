@@ -6,10 +6,10 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.get('/:examId', getQuestionsByExamId);
-router.post('/', createQuestion);
 router.post('/bulk-delete', bulkDeleteQuestions);
 router.post('/import', upload.single('file'), importQuestions);
+router.get('/:examId', getQuestionsByExamId);
+router.post('/', createQuestion);
 router.put('/:id', updateQuestion);
 router.delete('/:id', deleteQuestion);
 

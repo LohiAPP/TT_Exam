@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ttexam-production.up.railway.app/';
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://ttexam-production.up.railway.app').replace(/\/$/, '');
 
 const api = {
   async handleResponse(response) {
