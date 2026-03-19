@@ -40,11 +40,33 @@ export default function LoginPage() {
           </div>
           <div className="mb-4">
             <label>Password</label>
-            <input 
-              type="password" 
-              value={form.password} 
-              onChange={(e) => setForm({...form, password: e.target.value})} 
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={form.password} 
+                onChange={(e) => setForm({...form, password: e.target.value})} 
+                style={{ width: '100%', paddingRight: '40px' }}
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn btn-primary w-full" style={{ width: '100%' }}>Login</button>
         </form>
