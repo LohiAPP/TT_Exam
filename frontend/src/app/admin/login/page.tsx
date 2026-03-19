@@ -16,7 +16,7 @@ export default function LoginPage() {
       localStorage.setItem('isAdminLoggedIn', 'true');
       router.push('/admin');
     } else {
-      alert('Invalid credentials. Hint: use admin / admin123');
+      alert('Invalid username or password.');
     }
   };
 
