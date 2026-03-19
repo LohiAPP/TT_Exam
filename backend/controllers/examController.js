@@ -31,26 +31,39 @@ const startExam = async (req, res) => {
       });
     }
 
-    // Upsert user (create if doesn't exist)
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({ where: { rollNo } });
+    
+    if (existingUser) {
+      // Validate that details match existing user record
+      if (existingUser.name !== name || existingUser.phone !== phone) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Roll number is already registered with different details. Please use your registered name and mobile number.' 
+        });
+      }
+
+      // Check if this specific user already attempted this exam
+      const existingResult = await prisma.result.findUnique({
+        where: {
+          userId_examId: {
+            userId: existingUser.id,
+            examId: exam.id
+          }
+        }
+      });
+
+      if (existingResult) {
+        return res.status(400).json({ success: false, message: 'Details are already used' });
+      }
+    }
+
+    // Upsert/Update user (if they passed the checks above)
     const user = await prisma.user.upsert({
       where: { rollNo },
       update: { name, phone, location, pincode },
       create: { name, rollNo, phone, location, pincode }
     });
-
-    // Check if user already attempted this exam
-    const existingResult = await prisma.result.findUnique({
-      where: {
-        userId_examId: {
-          userId: user.id,
-          examId: exam.id
-        }
-      }
-    });
-
-    if (existingResult) {
-      return res.status(400).json({ success: false, message: 'You have already attempted this exam' });
-    }
 
     res.json({
       success: true,
