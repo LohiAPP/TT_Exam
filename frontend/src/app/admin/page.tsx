@@ -72,14 +72,21 @@ export default function AdminDashboard() {
   const handleSaveExam = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert local input strings to proper ISO UTC for backend
+      const payload = {
+        ...examFormData,
+        startTime: new Date(examFormData.startTime).toISOString(),
+        endTime: new Date(examFormData.endTime).toISOString()
+      };
+
       const res = isEditingExam 
-        ? await api.updateExam(examFormData.id, examFormData)
-        : await api.createExam(examFormData);
+        ? await api.updateExam(examFormData.id, payload)
+        : await api.createExam(payload);
       
       if (res.success) {
         setShowExamForm(false);
         setIsEditingExam(false);
-        fetchData();
+        await fetchData();
         setExamFormData({ id: '', title: '', examId: '', duration: 60, startTime: '', endTime: '', totalQuestions: 10, isActive: true });
       }
     } catch (err: any) {
