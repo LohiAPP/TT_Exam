@@ -5,6 +5,25 @@ import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import { GlassCard } from '@/components/GlassCard';
 
+// SVG Icons
+const Icons = {
+  Dashboard: ({ active }: { active?: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "#0F172A" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="11" width="7" height="10"></rect><rect x="3" y="15" width="7" height="6"></rect></svg>
+  ),
+  Exams: ({ active }: { active?: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "#0F172A" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+  ),
+  Questions: ({ active }: { active?: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "#0F172A" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+  ),
+  Results: ({ active }: { active?: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? "#0F172A" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+  ),
+  Logout: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+  )
+};
+
 // Helper to format date for datetime-local input (stripping TZ shift)
 const formatForInput = (dateStr: string) => {
   if (!dateStr) return '';
@@ -72,7 +91,6 @@ export default function AdminDashboard() {
   const handleSaveExam = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Convert local input strings to proper ISO UTC for backend
       const payload = {
         ...examFormData,
         startTime: new Date(examFormData.startTime).toISOString(),
@@ -224,20 +242,22 @@ export default function AdminDashboard() {
     window.open(api.getExportUrl(selectedExamId), '_blank');
   };
 
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', Icon: Icons.Dashboard },
+    { id: 'exams', label: 'Exams', Icon: Icons.Exams },
+    { id: 'questions', label: 'Questions', Icon: Icons.Questions },
+    { id: 'results', label: 'Results', Icon: Icons.Results }
+  ];
+
   if (loading) return <div className="container text-center">Loading Dashboard...</div>;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#020617', color: 'white' }}>
-      {/* Sidebar */}
+      {/* Sidebar (Desktop) */}
       <aside className="sidebar">
         <h2 style={{ color: 'var(--accent)', marginBottom: '2.5rem', paddingLeft: '1rem' }}>Admin Panel</h2>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {[
-            { id: 'dashboard', label: '📊 Dashboard' },
-            { id: 'exams', label: '📝 Exams' },
-            { id: 'questions', label: '❓ Questions' },
-            { id: 'results', label: '🏆 Results' }
-          ].map(item => (
+          {navItems.map(item => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
@@ -249,21 +269,36 @@ export default function AdminDashboard() {
                 color: activeTab === item.id ? 'var(--primary)' : '#94A3B8'
               }}
             >
-              {item.label}
+              <item.Icon active={activeTab === item.id} />
+              <span style={{ marginLeft: '0.75rem' }}>{item.label}</span>
             </button>
           ))}
           <button 
             className="btn btn-outline" 
-            style={{ marginTop: 'auto', color: '#EF4444', borderColor: '#EF4444' }}
+            style={{ marginTop: 'auto', color: '#EF4444', borderColor: '#EF4444', justifyContent: 'flex-start' }}
             onClick={() => { localStorage.removeItem('isAdminLoggedIn'); router.push('/admin/login'); }}
           >
-             🚪 Logout
+             <Icons.Logout />
+             <span style={{ marginLeft: '0.75rem' }}>Logout</span>
           </button>
         </nav>
       </aside>
 
+      {/* Mobile Nav Bar */}
+      <nav className="mobile-nav-bar">
+        {navItems.map(item => (
+          <div 
+            key={item.id} 
+            className={`nav-icon ${activeTab === item.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(item.id)}
+          >
+            <item.Icon active={activeTab === item.id} />
+          </div>
+        ))}
+      </nav>
+
       {/* Main Content */}
-      <main className="main-content" style={{ flex: 1, overflowY: 'auto' }}>
+      <main className="main-content" style={{ flex: 1, paddingBottom: '90px' }}>
         {activeTab === 'dashboard' && (
           <div className="animate-fade">
             <h1 style={{ marginBottom: '2rem' }}>Dashboard Overview</h1>
@@ -286,49 +321,51 @@ export default function AdminDashboard() {
 
         {activeTab === 'exams' && (
           <div className="animate-fade">
-            <div className="flex justify-between items-center mb-8">
+            <div className="admin-header">
               <h1>Exam Management</h1>
-              <button className="btn btn-primary" onClick={() => { setIsEditingExam(false); setExamFormData({ id: '', title: '', examId: '', duration: 60, startTime: '', endTime: '', totalQuestions: 10, isActive: true }); setShowExamForm(true); }}>+ Create Exam</button>
+              <button className="btn btn-primary" style={{ width: 'auto' }} onClick={() => { setIsEditingExam(false); setExamFormData({ id: '', title: '', examId: '', duration: 60, startTime: '', endTime: '', totalQuestions: 10, isActive: true }); setShowExamForm(true); }}>+ Create Exam</button>
             </div>
 
             {showExamForm && (
               <GlassCard className="mb-8">
                 <h3>{isEditingExam ? 'Edit' : 'Create'} Exam</h3>
-                <form onSubmit={handleSaveExam} className="mt-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label className="text-muted">Title</label>
-                    <input type="text" value={examFormData.title} onChange={e => setExamFormData({...examFormData, title: e.target.value})} placeholder="Final Term Exam" required />
+                <form onSubmit={handleSaveExam} className="mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                   <div className="grid-2">
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="text-muted">Title</label>
+                      <input type="text" value={examFormData.title} onChange={e => setExamFormData({...examFormData, title: e.target.value})} placeholder="Final Term Exam" required />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-muted">Exam ID (Slug)</label>
+                      <input type="text" value={examFormData.examId} onChange={e => setExamFormData({...examFormData, examId: e.target.value})} placeholder="final-2024" required />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-muted">Duration (Mins)</label>
+                      <input type="number" value={examFormData.duration} onChange={e => setExamFormData({...examFormData, duration: parseInt(e.target.value)})} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-muted">Start Time</label>
+                      <input type="datetime-local" value={examFormData.startTime} onChange={e => setExamFormData({...examFormData, startTime: e.target.value})} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-muted">End Time</label>
+                      <input type="datetime-local" value={examFormData.endTime} onChange={e => setExamFormData({...examFormData, endTime: e.target.value})} required />
+                    </div>
+                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <input type="checkbox" id="isActive" checked={examFormData.isActive} onChange={e => setExamFormData({...examFormData, isActive: e.target.checked})} />
+                      <label htmlFor="isActive">Is Active?</label>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-muted">Exam ID (Slug)</label>
-                    <input type="text" value={examFormData.examId} onChange={e => setExamFormData({...examFormData, examId: e.target.value})} placeholder="final-2024" required />
-                  </div>
-                  <div>
-                    <label className="text-muted">Duration (Mins)</label>
-                    <input type="number" value={examFormData.duration} onChange={e => setExamFormData({...examFormData, duration: parseInt(e.target.value)})} required />
-                  </div>
-                  <div>
-                    <label className="text-muted">Start Time</label>
-                    <input type="datetime-local" value={examFormData.startTime} onChange={e => setExamFormData({...examFormData, startTime: e.target.value})} required />
-                  </div>
-                  <div>
-                    <label className="text-muted">End Time</label>
-                    <input type="datetime-local" value={examFormData.endTime} onChange={e => setExamFormData({...examFormData, endTime: e.target.value})} required />
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <input type="checkbox" id="isActive" checked={examFormData.isActive} onChange={e => setExamFormData({...examFormData, isActive: e.target.checked})} />
-                    <label htmlFor="isActive">Active</label>
-                  </div>
-                  <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{isEditingExam ? 'Update' : 'Save'} Exam</button>
-                    <button type="button" className="btn btn-outline" onClick={() => setShowExamForm(false)} style={{ flex: 1 }}>Cancel</button>
+                  <div className="grid-2" style={{ gap: '1rem', marginTop: '1rem' }}>
+                    <button type="submit" className="btn btn-primary">{isEditingExam ? 'Update' : 'Save'} Exam</button>
+                    <button type="button" className="btn btn-outline" onClick={() => setShowExamForm(false)}>Cancel</button>
                   </div>
                 </form>
               </GlassCard>
             )}
 
-            <div className="glass">
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="glass" style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                 <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <tr>
                     <th style={{ padding: '1rem' }}>Exam</th>
@@ -351,10 +388,12 @@ export default function AdminDashboard() {
                       <td style={{ padding: '1rem' }}>
                          <span style={{ color: e.isActive ? '#10B981' : '#EF4444' }}>{e.isActive ? 'Active' : 'Inactive'}</span>
                       </td>
-                      <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleEditExam(e)}>Edit</button>
-                        <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: '#EF4444' }} onClick={() => handleDeleteExam(e.id)}>Del</button>
-                        <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => { setActiveTab('questions'); fetchQuestions(e.id); setQuestionFormData({...questionFormData, examId: e.id}); }}>Manage Qs</button>
+                      <td style={{ padding: '1rem' }}>
+                        <div className="flex gap-2">
+                           <button className="btn btn-outline btn-icon" title="Edit" onClick={() => handleEditExam(e)}>✍️</button>
+                           <button className="btn btn-outline btn-icon" style={{ borderColor: '#EF4444', color: '#EF4444' }} title="Delete" onClick={() => handleDeleteExam(e.id)}>🗑️</button>
+                           <button className="btn btn-primary btn-icon" title="Manage Questions" onClick={() => { setActiveTab('questions'); fetchQuestions(e.id); setQuestionFormData({...questionFormData, examId: e.id}); }}>❓</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -366,11 +405,11 @@ export default function AdminDashboard() {
 
         {activeTab === 'questions' && (
           <div className="animate-fade">
-            <div className="flex justify-between items-center mb-8">
+            <div className="admin-header">
               <h1>Question Bank</h1>
-              <div className="flex gap-4">
+              <div className="flex gap-3 mobile-stack w-full sm-w-auto">
                 <select 
-                  className="btn glass" 
+                  className="btn glass w-full sm-w-auto" 
                   value={selectedExamId} 
                   onChange={e => fetchQuestions(e.target.value)}
                   style={{ background: '#0F172A', color: 'white', border: '1px solid var(--glass-border)', padding: '0.5rem 1rem' }}
@@ -378,22 +417,25 @@ export default function AdminDashboard() {
                   <option value="" style={{ background: '#0F172A', color: 'white' }}>Select Exam</option>
                   {exams.map(e => <option key={e.id} value={e.id} style={{ background: '#0F172A', color: 'white' }}>{e.title}</option>)}
                 </select>
-                <button className="btn btn-outline" onClick={() => setShowImportPreview(true)}>ℹ️ Format</button>
-                <input 
-                  type="file" 
-                  accept=".xlsx, .csv" 
-                  ref={fileInputRef} 
-                  style={{ display: 'none' }} 
-                  onChange={handleImportFile}
-                />
-                <button 
-                  className="btn btn-outline" 
-                  disabled={!selectedExamId || importing} 
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {importing ? '⌛ Importing...' : '📤 Bulk Import (Excel)'}
-                </button>
-                <button className="btn btn-primary" disabled={!selectedExamId} onClick={() => { setQuestionFormData({ id: '', examId: selectedExamId, question: '', optionA: '', optionB: '', optionC: '', optionD: '', correct: 'A' }); setShowQuestionForm(true); }}>+ Add Single Q</button>
+                <div className="flex gap-2 w-full sm-w-auto">
+                  <button className="btn btn-outline btn-icon" title="View Format" onClick={() => setShowImportPreview(true)}>ℹ️</button>
+                  <input 
+                    type="file" 
+                    accept=".xlsx, .csv" 
+                    ref={fileInputRef} 
+                    style={{ display: 'none' }} 
+                    onChange={handleImportFile}
+                  />
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ flex: 1 }}
+                    disabled={!selectedExamId || importing} 
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {importing ? '⌛' : '📤 Bulk Import'}
+                  </button>
+                  <button className="btn btn-primary btn-icon" disabled={!selectedExamId} onClick={() => { setQuestionFormData({ id: '', examId: selectedExamId, question: '', optionA: '', optionB: '', optionC: '', optionD: '', correct: 'A' }); setShowQuestionForm(true); }}>+</button>
+                </div>
               </div>
             </div>
 
@@ -428,7 +470,6 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
-                <p className="text-muted mt-4 small"><em>Note: Headers are case-insensitive. Column order doesn't matter. Correct should be A, B, C, or D.</em></p>
               </GlassCard>
             )}
 
@@ -436,8 +477,8 @@ export default function AdminDashboard() {
               <GlassCard className="mb-8">
                 <h3>{questionFormData.id ? 'Edit' : 'Add'} Question</h3>
                 <form onSubmit={handleSaveQuestion} className="mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <textarea value={questionFormData.question} onChange={e => setQuestionFormData({...questionFormData, question: e.target.value})} placeholder="What is the question?" required />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <textarea value={questionFormData.question} onChange={e => setQuestionFormData({...questionFormData, question: e.target.value})} placeholder="What is the question?" required rows={3} />
+                  <div className="grid-2">
                     <input type="text" value={questionFormData.optionA} onChange={e => setQuestionFormData({...questionFormData, optionA: e.target.value})} placeholder="Option A" required />
                     <input type="text" value={questionFormData.optionB} onChange={e => setQuestionFormData({...questionFormData, optionB: e.target.value})} placeholder="Option B" required />
                     <input type="text" value={questionFormData.optionC} onChange={e => setQuestionFormData({...questionFormData, optionC: e.target.value})} placeholder="Option C" required />
@@ -449,17 +490,17 @@ export default function AdminDashboard() {
                       {['A', 'B', 'C', 'D'].map(o => <option key={o} value={o}>Option {o}</option>)}
                     </select>
                   </div>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save</button>
-                    <button type="button" className="btn btn-outline" onClick={() => setShowQuestionForm(false)} style={{ flex: 1 }}>Cancel</button>
+                  <div className="grid-2">
+                    <button type="submit" className="btn btn-primary">Save</button>
+                    <button type="button" className="btn btn-outline" onClick={() => setShowQuestionForm(false)}>Cancel</button>
                   </div>
                 </form>
               </GlassCard>
             )}
 
-            <div className="glass">
+            <div className="glass" style={{ overflowX: 'auto' }}>
               {!selectedExamId ? <p style={{ padding: '2rem', textAlign: 'center' }}>Please select an exam to manage questions.</p> : questions.length === 0 ? <p style={{ padding: '2rem', textAlign: 'center' }}>No questions found for this exam.</p> : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
                      <tr>
                         <th style={{ padding: '1rem', width: '50px' }}>No.</th>
@@ -472,11 +513,13 @@ export default function AdminDashboard() {
                      {questions.map((q, index) => (
                        <tr key={q.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
                          <td style={{ padding: '1rem', color: 'var(--accent)', fontWeight: 'bold' }}>{index + 1}</td>
-                         <td style={{ padding: '1rem' }}>{q.question.substring(0, 80)}...</td>
+                         <td style={{ padding: '1rem' }}>{q.question.substring(0, 60)}...</td>
                          <td style={{ padding: '1rem' }}>{q.correct}</td>
-                         <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                           <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => { setQuestionFormData(q); setShowQuestionForm(true); }}>Edit</button>
-                           <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: '#EF4444' }} onClick={() => handleDeleteQuestion(q.id, q.examId)}>Del</button>
+                         <td style={{ padding: '1rem' }}>
+                           <div className="flex gap-2">
+                             <button className="btn btn-outline btn-icon" onClick={() => { setQuestionFormData(q); setShowQuestionForm(true); }}>✍️</button>
+                             <button className="btn btn-outline btn-icon" style={{ borderColor: '#EF4444', color: '#EF4444' }} onClick={() => handleDeleteQuestion(q.id, q.examId)}>🗑️</button>
+                           </div>
                          </td>
                        </tr>
                      ))}
@@ -489,11 +532,11 @@ export default function AdminDashboard() {
 
         {activeTab === 'results' && (
           <div className="animate-fade">
-             <div className="flex justify-between items-center mb-8">
+             <div className="admin-header">
               <h1>User Results</h1>
-              <div className="flex gap-4">
+              <div className="flex gap-4 mobile-stack w-full sm-w-auto">
                 <select 
-                  className="btn glass" 
+                  className="btn glass w-full sm-w-auto" 
                   value={selectedExamId}
                   onChange={e => { fetchResults(e.target.value); }}
                   style={{ background: '#0F172A', color: 'white', border: '1px solid var(--glass-border)', padding: '0.5rem 1rem' }}
@@ -501,37 +544,39 @@ export default function AdminDashboard() {
                   <option value="" style={{ background: '#0F172A', color: 'white' }}>Select Exam</option>
                   {exams.map(e => <option key={e.id} value={e.id} style={{ background: '#0F172A', color: 'white' }}>{e.title}</option>)}
                 </select>
-                <button className="btn btn-primary" onClick={handleExport} disabled={!selectedExamId}>📥 Export CSV</button>
+                <button className="btn btn-primary" style={{ width: 'auto' }} onClick={handleExport} disabled={!selectedExamId}>📥 Export CSV</button>
               </div>
             </div>
 
             {showResultForm && (
               <GlassCard className="mb-8">
                 <h3>Edit Result</h3>
-                <form onSubmit={handleSaveResult} className="mt-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label className="text-muted">Score</label>
-                    <input type="number" value={resultFormData.score} onChange={e => setResultFormData({...resultFormData, score: parseInt(e.target.value)})} required />
+                <form onSubmit={handleSaveResult} className="mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label className="text-muted">Score</label>
+                      <input type="number" value={resultFormData.score} onChange={e => setResultFormData({...resultFormData, score: parseInt(e.target.value)})} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-muted">Percentage</label>
+                      <input type="number" step="0.01" value={resultFormData.percentage} onChange={e => setResultFormData({...resultFormData, percentage: parseFloat(e.target.value)})} required />
+                    </div>
+                    <div className="form-group">
+                      <label className="text-muted">Time Taken (Secs)</label>
+                      <input type="number" value={resultFormData.timeTaken} onChange={e => setResultFormData({...resultFormData, timeTaken: parseInt(e.target.value)})} required />
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-muted">Percentage</label>
-                    <input type="number" step="0.01" value={resultFormData.percentage} onChange={e => setResultFormData({...resultFormData, percentage: parseFloat(e.target.value)})} required />
-                  </div>
-                  <div>
-                    <label className="text-muted">Time Taken (Secs)</label>
-                    <input type="number" value={resultFormData.timeTaken} onChange={e => setResultFormData({...resultFormData, timeTaken: parseInt(e.target.value)})} required />
-                  </div>
-                  <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Update Result</button>
-                    <button type="button" className="btn btn-outline" onClick={() => setShowResultForm(false)} style={{ flex: 1 }}>Cancel</button>
+                  <div className="grid-2" style={{ gap: '1rem', marginTop: '1rem' }}>
+                    <button type="submit" className="btn btn-primary">Update Result</button>
+                    <button type="button" className="btn btn-outline" onClick={() => setShowResultForm(false)}>Cancel</button>
                   </div>
                 </form>
               </GlassCard>
             )}
 
-            <div className="glass">
+            <div className="glass" style={{ overflowX: 'auto' }}>
               {results.length === 0 ? <p style={{ padding: '2rem', textAlign: 'center' }}>Select an exam to view user performance.</p> : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '700px' }}>
                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
                      <tr>
                         <th style={{ padding: '1rem' }}>User</th>
@@ -556,9 +601,11 @@ export default function AdminDashboard() {
                          <td style={{ padding: '1rem' }}>{r.score}</td>
                          <td style={{ padding: '1rem' }}>{Math.round(r.percentage)}%</td>
                          <td style={{ padding: '1rem' }}><small>{Math.floor(r.timeTaken / 60)}m {r.timeTaken % 60}s</small></td>
-                         <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                            <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => { setResultFormData({id: r.id, score: r.score, percentage: r.percentage, timeTaken: r.timeTaken, examId: r.examId}); setShowResultForm(true); }}>Edit</button>
-                            <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', color: '#EF4444' }} onClick={() => handleDeleteResult(r.id, r.examId)}>Del</button>
+                         <td style={{ padding: '1rem' }}>
+                           <div className="flex gap-2">
+                              <button className="btn btn-outline btn-icon" onClick={() => { setResultFormData({id: r.id, score: r.score, percentage: r.percentage, timeTaken: r.timeTaken, examId: r.examId}); setShowResultForm(true); }}>✍️</button>
+                              <button className="btn btn-outline btn-icon" style={{ borderColor: '#EF4444', color: '#EF4444' }} onClick={() => handleDeleteResult(r.id, r.examId)}>🗑️</button>
+                           </div>
                          </td>
                        </tr>
                      ))}
