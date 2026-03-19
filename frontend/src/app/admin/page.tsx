@@ -252,38 +252,7 @@ export default function AdminDashboard() {
   if (loading) return <div className="container text-center">Loading Dashboard...</div>;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#020617', color: 'white' }}>
-      {/* Sidebar (Desktop) */}
-      <aside className="sidebar">
-        <h2 style={{ color: 'var(--accent)', marginBottom: '2.5rem', paddingLeft: '1rem' }}>Admin Panel</h2>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`btn ${activeTab === item.id ? 'btn-primary' : 'btn-outline'}`}
-              style={{ 
-                justifyContent: 'flex-start', 
-                border: activeTab === item.id ? 'none' : '1px solid transparent',
-                background: activeTab === item.id ? 'var(--accent)' : 'transparent',
-                color: activeTab === item.id ? 'var(--primary)' : '#94A3B8'
-              }}
-            >
-              <item.Icon active={activeTab === item.id} />
-              <span style={{ marginLeft: '0.75rem' }}>{item.label}</span>
-            </button>
-          ))}
-          <button 
-            className="btn btn-outline" 
-            style={{ marginTop: 'auto', color: '#EF4444', borderColor: '#EF4444', justifyContent: 'flex-start' }}
-            onClick={() => { localStorage.removeItem('isAdminLoggedIn'); router.push('/admin/login'); }}
-          >
-             <Icons.Logout />
-             <span style={{ marginLeft: '0.75rem' }}>Logout</span>
-          </button>
-        </nav>
-      </aside>
-
+    <>
       {/* Mobile Nav Bar */}
       <nav className="mobile-nav-bar">
         {navItems.map(item => (
@@ -297,8 +266,40 @@ export default function AdminDashboard() {
         ))}
       </nav>
 
-      {/* Main Content */}
-      <main className="main-content" style={{ flex: 1, paddingBottom: '90px' }}>
+      <div className="admin-layout">
+        {/* Sidebar (Desktop) */}
+        <aside className="sidebar">
+          <h2 style={{ color: 'var(--accent)', marginBottom: '2.5rem', paddingLeft: '1rem' }}>Admin Panel</h2>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`btn ${activeTab === item.id ? 'btn-primary' : 'btn-outline'}`}
+                style={{ 
+                  justifyContent: 'flex-start', 
+                  border: activeTab === item.id ? 'none' : '1px solid transparent',
+                  background: activeTab === item.id ? 'var(--accent)' : 'transparent',
+                  color: activeTab === item.id ? 'var(--primary)' : '#94A3B8'
+                }}
+              >
+                <item.Icon active={activeTab === item.id} />
+                <span style={{ marginLeft: '0.75rem' }}>{item.label}</span>
+              </button>
+            ))}
+            <button 
+              className="btn btn-outline" 
+              style={{ marginTop: 'auto', color: '#EF4444', borderColor: '#EF4444', justifyContent: 'flex-start' }}
+              onClick={() => { localStorage.removeItem('isAdminLoggedIn'); router.push('/admin/login'); }}
+            >
+               <Icons.Logout />
+               <span style={{ marginLeft: '0.75rem' }}>Logout</span>
+            </button>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="main-content" style={{ flex: 1, paddingBottom: '90px' }}>
         {activeTab === 'dashboard' && (
           <div className="animate-fade">
             <h1 style={{ marginBottom: '2rem' }}>Dashboard Overview</h1>
@@ -616,6 +617,7 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
-    </div>
+      </div>
+    </>
   );
 }
