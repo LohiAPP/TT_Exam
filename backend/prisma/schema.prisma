@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String   @id @default(uuid())
+  name    String
+  rollNo  String   @unique
+  phone   String
+  location String?
+  pincode String?
+  results Result[]
+}
+
+model Exam {
+  id             String     @id @default(uuid())
+  title          String
+  examId         String     @unique
+  duration       Int        // in minutes
+  startTime      DateTime   // Exam start time
+  endTime        DateTime   // Exam end time
+  totalQuestions Int
+  isActive       Boolean    @default(true)
+  questions      Question[]
+  results        Result[]
+}
+
+model Question {
+  id       String @id @default(uuid())
+  exam     Exam   @relation(fields: [examId], references: [id])
+  examId   String
+  question String
+  optionA  String
+  optionB  String
+  optionC  String
+  optionD  String
+  correct  String // Store "A", "B", "C", or "D"
+}
+
+model Result {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  exam         Exam     @relation(fields: [examId], references: [id])
+  examId       String
+  score        Int
+  percentage   Float
+  answers      Json     // Store user's selected options: { questionId: "A" }
+  submitted    Boolean  @default(true)
+  timeTaken    Int      // in seconds
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, examId])
+}
