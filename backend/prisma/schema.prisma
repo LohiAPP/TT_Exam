@@ -37,7 +37,7 @@ model Exam {
 
 model Question {
   id       String @id @default(uuid())
-  exam     Exam   @relation(fields: [examId], references: [id])
+  exam     Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId   String
   question String
   optionA  String
@@ -51,7 +51,7 @@ model Result {
   id           String   @id @default(uuid())
   user         User     @relation(fields: [userId], references: [id])
   userId       String
-  exam         Exam     @relation(fields: [examId], references: [id])
+  exam         Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId       String
   score        Int
   percentage   Float
