@@ -70,8 +70,8 @@ export default function Home() {
       } else {
         alert(response.message);
       }
-    } catch (error) {
-      alert('Enrollment failed. Please try again.');
+    } catch (error: any) {
+      alert(error.message || 'Enrollment failed. Please try again.');
     }
   };
 

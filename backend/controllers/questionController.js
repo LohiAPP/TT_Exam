@@ -123,4 +123,27 @@ const importQuestions = async (req, res) => {
   }
 };
 
-module.exports = { getQuestionsByExamId, createQuestion, updateQuestion, deleteQuestion, importQuestions };
+const bulkDeleteQuestions = async (req, res) => {
+  const { ids } = req.body;
+  if (!ids || !Array.isArray(ids)) {
+    return res.status(400).json({ success: false, message: 'Invalid IDs provided' });
+  }
+
+  try {
+    await prisma.question.deleteMany({
+      where: { id: { in: ids } }
+    });
+    res.json({ success: true, message: `Successfully deleted ${ids.length} questions` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { 
+  getQuestionsByExamId, 
+  createQuestion, 
+  updateQuestion, 
+  deleteQuestion, 
+  importQuestions,
+  bulkDeleteQuestions 
+};

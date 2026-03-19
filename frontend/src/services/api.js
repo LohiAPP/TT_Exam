@@ -125,6 +125,15 @@ const api = {
     return this.handleResponse(response);
   },
 
+  async bulkDeleteQuestions(ids) {
+    const response = await fetch(`${BASE_URL}/api/questions/bulk-delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids })
+    });
+    return this.handleResponse(response);
+  },
+
   getExportUrl(examId) {
     return `${BASE_URL}/api/results/${examId}/export`;
   }

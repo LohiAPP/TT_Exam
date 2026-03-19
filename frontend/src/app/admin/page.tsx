@@ -50,6 +50,7 @@ export default function AdminDashboard() {
   const [showImportPreview, setShowImportPreview] = useState(false);
   const [isEditingExam, setIsEditingExam] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState('');
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
 
   // Forms
@@ -181,6 +182,7 @@ export default function AdminDashboard() {
         const res = await api.deleteQuestion(id);
         if (res.success) {
           await fetchQuestions(examId);
+          setSelectedQuestionIds(prev => prev.filter(i => i !== id));
         } else {
           alert('Delete failed');
         }
@@ -188,6 +190,38 @@ export default function AdminDashboard() {
         alert(err.message || 'Error occurred');
       }
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedQuestionIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedQuestionIds.length} questions?`)) {
+      setTabLoading(true);
+      try {
+        const res = await api.bulkDeleteQuestions(selectedQuestionIds);
+        if (res.success) {
+          await fetchQuestions(selectedExamId);
+          setSelectedQuestionIds([]);
+        }
+      } catch (err: any) {
+        alert(err.message || 'Bulk delete failed');
+      } finally {
+        setTabLoading(false);
+      }
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedQuestionIds.length === questions.length && questions.length > 0) {
+      setSelectedQuestionIds([]);
+    } else {
+      setSelectedQuestionIds(questions.map(q => q.id));
+    }
+  };
+
+  const toggleSelectQuestion = (id: string) => {
+    setSelectedQuestionIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
   };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -501,6 +535,15 @@ export default function AdminDashboard() {
                     >
                       {importing ? '⌛' : '📤 Bulk Import'}
                     </button>
+                    <button 
+                      className="btn btn-outline btn-icon" 
+                      title="Delete Selected" 
+                      style={{ borderColor: '#EF4444', color: '#EF4444' }} 
+                      disabled={selectedQuestionIds.length === 0} 
+                      onClick={handleBulkDelete}
+                    >
+                      🗑️
+                    </button>
                     <button className="btn btn-primary btn-icon" disabled={!selectedExamId} onClick={() => { setQuestionFormData({ id: '', examId: selectedExamId, question: '', optionA: '', optionB: '', optionC: '', optionD: '', correct: 'A' }); setShowQuestionForm(true); }}>+</button>
                   </div>
                 </div>
@@ -569,17 +612,19 @@ export default function AdminDashboard() {
                 {!selectedExamId ? <p style={{ padding: '2rem', textAlign: 'center' }}>Please select an exam to manage questions.</p> : questions.length === 0 ? <p style={{ padding: '2rem', textAlign: 'center' }}>No questions found for this exam.</p> : (
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                      <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                       <tr>
-                          <th style={{ padding: '1rem', width: '50px' }}>No.</th>
-                          <th style={{ padding: '1rem' }}>Question</th>
-                          <th style={{ padding: '1rem' }}>Correct</th>
-                          <th style={{ padding: '1rem' }}>Actions</th>
-                       </tr>
+                        <tr>
+                           <th style={{ padding: '1rem', width: '40px' }}><input type="checkbox" checked={selectedQuestionIds.length === questions.length && questions.length > 0} onChange={toggleSelectAll} /></th>
+                           <th style={{ padding: '1rem', width: '50px' }}>No.</th>
+                           <th style={{ padding: '1rem' }}>Question</th>
+                           <th style={{ padding: '1rem' }}>Correct</th>
+                           <th style={{ padding: '1rem' }}>Actions</th>
+                        </tr>
                      </thead>
                      <tbody>
-                       {questions.map((q, index) => (
-                         <tr key={q.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                           <td style={{ padding: '1rem', color: 'var(--accent)', fontWeight: 'bold' }}>{index + 1}</td>
+                        {questions.map((q, index) => (
+                          <tr key={q.id} style={{ borderBottom: '1px solid var(--glass-border)', background: selectedQuestionIds.includes(q.id) ? 'rgba(6,182,212,0.05)' : 'transparent' }}>
+                            <td style={{ padding: '1rem' }}><input type="checkbox" checked={selectedQuestionIds.includes(q.id)} onChange={() => toggleSelectQuestion(q.id)} /></td>
+                            <td style={{ padding: '1rem', color: 'var(--accent)', fontWeight: 'bold' }}>{index + 1}</td>
                            <td style={{ padding: '1rem' }}>{q.question.substring(0, 60)}...</td>
                            <td style={{ padding: '1rem', fontWeight: 700, color: 'var(--accent)' }}>{q.correct}</td>
                            <td style={{ padding: '1rem' }}>
@@ -660,6 +705,7 @@ export default function AdminDashboard() {
                          <td style={{ padding: '1rem' }}>
                             <strong style={{ color: 'var(--accent)' }}>{r.user.name}</strong>
                             <br/><small className="text-muted">{r.user.rollNo}</small>
+                            <br/><small style={{ color: 'var(--accent)', opacity: 0.8 }}>{r.user.phone}</small>
                          </td>
                          <td style={{ padding: '1rem' }}>
                             <strong>{r.user.location}</strong>
