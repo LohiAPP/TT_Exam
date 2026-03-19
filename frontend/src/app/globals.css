@@ -168,3 +168,75 @@ input:focus, textarea:focus {
   margin-left: 260px;
   padding: 2rem;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .glass-card {
+    padding: 1.5rem !important;
+  }
+
+  .sidebar {
+    display: none; /* Hide default sidebar on mobile, implement drawer if needed */
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-stack {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .mobile-text-center {
+    text-align: center !important;
+  }
+
+  .mobile-p-0 {
+    padding: 0 !important;
+  }
+
+  h1 { font-size: 2.5rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  
+  .btn {
+    width: 100%;
+    padding: 1rem !important;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* Helper Classes */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.w-full { width: 100%; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.badge {
+  display: inline-block;
+  border-radius: 50px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.text-muted { color: var(--text-muted); }

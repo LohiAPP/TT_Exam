@@ -22,9 +22,13 @@ export default function Home() {
 
   useEffect(() => {
     const fetchExams = async () => {
-      const res = await api.getExams();
-      if (res.success) {
-        setExams(res.data.filter((e: any) => e.isActive));
+      try {
+        const res = await api.getExams();
+        if (res.success) {
+          setExams(res.data.filter((e: any) => e.isActive));
+        }
+      } catch (err) {
+        console.error('Failed to load exams');
       }
     };
     fetchExams();
@@ -72,7 +76,7 @@ export default function Home() {
   };
 
   return (
-    <main style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+    <main style={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden' }}>
       {/* Full Screen Welcome Content */}
       <div 
         className="flex-center animate-fade" 
@@ -82,41 +86,45 @@ export default function Home() {
           zIndex: 1,
           flexDirection: 'column',
           textAlign: 'center',
-          padding: '2rem',
+          padding: '1.5rem',
           filter: showLogin ? 'blur(10px)' : 'none',
           transition: 'filter 0.5s ease',
-          pointerEvents: showLogin ? 'none' : 'all'
+          pointerEvents: showLogin ? 'none' : 'all',
+          overflowY: 'auto'
         }}
       >
-        <span className="badge mb-6" style={{ background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent)', padding: '0.6rem 2rem', fontSize: '1rem', letterSpacing: '2px' }}>
+        <span className="badge mb-6" style={{ background: 'rgba(6, 182, 212, 0.1)', color: 'var(--accent)', padding: '0.6rem 2rem', fontSize: '0.875rem', letterSpacing: '2px' }}>
           DEEP DHYANA EXPERIENCE
         </span>
-        <h1 style={{ fontSize: 'clamp(3rem, 10vw, 5rem)', marginBottom: '1.5rem', lineHeight: '1', fontWeight: 800 }}>
-          Meditation Teacher <br/> Training Exam
+        
+        <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', marginBottom: '1rem', lineHeight: '1.1', fontWeight: 800 }}>
+          Meditation Teacher <br className="mobile-hide"/> Training Exam
         </h1>
-        <h2 style={{ fontSize: 'clamp(1.25rem, 4vw, 2rem)', color: 'var(--accent)', fontWeight: 500, opacity: 0.9, marginBottom: '2.5rem' }}>
+        
+        <h2 style={{ fontSize: 'clamp(1.1rem, 4vw, 2rem)', color: 'var(--accent)', fontWeight: 500, opacity: 0.9, marginBottom: '2rem' }}>
           By Nlight Spiritual Science Academy
         </h2>
         
-        <p style={{ fontSize: 'clamp(1rem, 3vw, 1.5rem)', color: '#CBD5E1', lineHeight: '1.6', marginBottom: '4rem', maxWidth: '800px' }}>
+        <p style={{ fontSize: 'clamp(0.9rem, 3vw, 1.25rem)', color: '#CBD5E1', lineHeight: '1.6', marginBottom: '3rem', maxWidth: '800px' }}>
           A transformative journey into inner stillness and the art of guiding others in meditation.
         </p>
 
         <button 
           className="btn btn-primary" 
           style={{ 
-            fontSize: '1.5rem', 
-            padding: '1.5rem 4rem', 
+            fontSize: 'clamp(1.1rem, 4vw, 1.5rem)', 
+            padding: '1.25rem 3rem', 
             borderRadius: '100px', 
             boxShadow: '0 20px 50px rgba(6, 182, 212, 0.3)',
-            border: '1px solid rgba(255,255,255,0.1)'
+            border: '1px solid rgba(255,255,255,0.1)',
+            minWidth: '280px'
           }}
           onClick={() => setShowLogin(true)}
         >
           Take Exam Now 🚀
         </button>
 
-        <div style={{ position: 'absolute', bottom: '3rem', width: '100%', display: 'flex', justifyContent: 'center', gap: '4rem', color: '#94A3B8', fontSize: '0.9rem', opacity: 0.6 }}>
+        <div className="mobile-hide" style={{ position: 'absolute', bottom: '3rem', width: '100%', display: 'flex', justifyContent: 'center', gap: '4rem', color: '#94A3B8', fontSize: '0.9rem', opacity: 0.6 }}>
           <span>✨ TRANSFORMATIVE</span>
           <span>🕉️ SPIRITUAL</span>
           <span>🧘 MEDITATIVE</span>
@@ -131,48 +139,49 @@ export default function Home() {
             position: 'fixed',
             inset: 0,
             zIndex: 10,
-            background: 'rgba(2, 6, 23, 0.4)',
-            backdropFilter: 'blur(5px)',
-            padding: '2rem'
+            background: 'rgba(2, 6, 23, 0.6)',
+            backdropFilter: 'blur(10px)',
+            padding: '1rem',
+            overflowY: 'auto'
           }}
           onClick={(e) => { if(e.target === e.currentTarget) setShowLogin(false); }}
         >
-          <GlassCard style={{ maxWidth: '500px', width: '100%', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-               <h2 style={{ fontSize: '1.75rem' }}>Admission Form</h2>
+          <GlassCard style={{ maxWidth: '500px', width: '100%', border: '1px solid rgba(255,255,255,0.1)', margin: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+               <h2 style={{ fontSize: '1.5rem' }}>Admission Form</h2>
                <button onClick={() => setShowLogin(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="form-group">
-                <label className="text-muted" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Full Name</label>
+                <label className="text-muted" style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.8rem' }}>Full Name</label>
                 <input type="text" name="name" placeholder="Ex: Shiva Kumar" value={formData.name} onChange={handleInputChange} required />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="grid-2">
                 <div className="form-group">
-                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Roll Number</label>
+                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.8rem' }}>Roll Number</label>
                   <input type="text" name="rollNo" placeholder="Ex: A26Jan***" value={formData.rollNo} onChange={handleInputChange} required />
                 </div>
                 <div className="form-group">
-                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Phone Number</label>
+                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.8rem' }}>Phone Number</label>
                   <input type="text" name="phone" placeholder="10 Digits" value={formData.phone} onChange={handleInputChange} required maxLength={10} />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="grid-2">
                 <div className="form-group">
-                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Location</label>
+                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.8rem' }}>Location</label>
                   <input type="text" name="location" placeholder="City/Town" value={formData.location} onChange={handleInputChange} required />
                 </div>
                 <div className="form-group">
-                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Pincode</label>
+                  <label className="text-muted" style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.8rem' }}>Pincode</label>
                   <input type="text" name="pincode" placeholder="6 Digits" value={formData.pincode} onChange={handleInputChange} required maxLength={6} />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="text-muted" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Select Exam</label>
+                <label className="text-muted" style={{ display: 'block', marginBottom: '0.35rem', fontSize: '0.8rem' }}>Select Exam</label>
                 <select
                   name="examId"
                   value={formData.examId}
@@ -188,24 +197,27 @@ export default function Home() {
               </div>
 
               {selectedExam && (
-                <div className="animate-fade" style={{ padding: '1rem', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{selectedExam.title}</span>
-                    <span className={`badge badge-${getExamStatus(selectedExam)?.status}`}>
+                <div className="animate-fade" style={{ padding: '0.75rem', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{selectedExam.title}</span>
+                    <span className={`badge badge-${getExamStatus(selectedExam)?.status}`} style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem' }}>
                       {getExamStatus(selectedExam)?.status?.toUpperCase()}
                     </span>
                   </div>
-                  <p style={{ fontSize: '0.75rem', color: '#94A3B8' }}>{getExamStatus(selectedExam)?.text}</p>
+                  <p style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{getExamStatus(selectedExam)?.text}</p>
                 </div>
               )}
 
               <button 
                 type="submit" 
                 className="btn btn-primary" 
-                style={{ marginTop: '1rem' }}
+                style={{ marginTop: '0.5rem' }}
                 disabled={!selectedExam || getExamStatus(selectedExam)?.status !== 'live'}
               >
-                Start Assessment Now
+                {selectedExam && getExamStatus(selectedExam)?.status !== 'live' 
+                  ? 'Exam Not Available' 
+                  : 'Start Assessment Now'
+                }
               </button>
             </form>
           </GlassCard>

@@ -110,7 +110,7 @@ export default function ExamPage() {
 
   if (loading && questions.length === 0) {
     return (
-      <div className="container flex items-center justify-center" style={{ minHeight: '80vh' }}>
+      <div className="container flex-center" style={{ minHeight: '80vh' }}>
         <div className="animate-fade text-center">
           <div style={{ width: '40px', height: '40px', border: '3px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }}></div>
           <p>Preparing your exam session...</p>
@@ -136,90 +136,98 @@ export default function ExamPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header className="glass" style={{ position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--glass-border)', borderRadius: 0 }}>
-        <div className="container flex justify-between items-center" style={{ padding: '1rem' }}>
-          <div>
-            <h2 style={{ fontSize: '1.25rem', color: 'var(--accent)' }}>{user?.title}</h2>
-            <p className="text-muted" style={{ fontSize: '0.75rem' }}>{user?.name} | {user?.rollNo}</p>
+        <div className="container flex justify-between items-center mobile-stack" style={{ padding: '0.75rem 1rem' }}>
+          <div className="mobile-text-center">
+            <h2 style={{ fontSize: 'clamp(1rem, 4vw, 1.25rem)', color: 'var(--accent)' }}>{user?.title}</h2>
+            <p className="text-muted" style={{ fontSize: '0.7rem' }}>{user?.name} | {user?.rollNo}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 w-full justify-between sm-justify-end" style={{ marginTop: '0.5rem' }}>
             <div style={{ 
               background: timeLeft < 300 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(6, 182, 212, 0.1)', 
               color: timeLeft < 300 ? '#EF4444' : 'var(--accent)', 
-              padding: '0.5rem 1rem', 
-              borderRadius: '10px', 
+              padding: '0.4rem 0.8rem', 
+              borderRadius: '8px', 
               fontWeight: 700,
-              fontSize: '1.25rem',
-              border: `1px solid ${timeLeft < 300 ? '#EF4444' : 'var(--accent)'}`
+              fontSize: '1.1rem',
+              border: `1px solid ${timeLeft < 300 ? '#EF4444' : 'var(--accent)'}`,
+              flex: 1,
+              textAlign: 'center'
             }}>
               ⏱️ {formatTime(timeLeft)}
             </div>
-            <button className="btn btn-primary" onClick={() => confirm('Submit your exam?') && handleSubmit()} disabled={loading}>
+            <button className="btn btn-primary" style={{ padding: '0.5rem 1.5rem', flex: 1 }} onClick={() => confirm('Submit your exam?') && handleSubmit()} disabled={loading}>
               Submit
             </button>
           </div>
         </div>
-        <div className="progress-container" style={{ borderRadius: 0 }}>
+        <div className="progress-container" style={{ borderRadius: 0, height: '4px' }}>
           <div className="progress-bar" style={{ width: `${progress}%` }}></div>
         </div>
       </header>
 
-      <main className="container" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
-        <GlassCard style={{ padding: '3rem' }}>
+      <main className="container" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
+        <GlassCard style={{ padding: 'clamp(1.5rem, 5vw, 3rem)' }}>
           <div className="flex justify-between items-center mb-6">
-            <span style={{ background: 'var(--accent)', color: 'var(--primary)', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.875rem', fontWeight: 600 }}>
+            <span style={{ background: 'var(--accent)', color: 'var(--primary)', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 }}>
               Question {currentIndex + 1}
             </span>
-            <span className="text-muted" style={{ fontSize: '0.875rem' }}>
-              Overall Progress: {Math.round(progress)}%
+            <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+              Progress: {Math.round(progress)}%
             </span>
           </div>
 
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '2.5rem', lineHeight: 1.4 }}>
+          <h3 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.5rem)', marginBottom: '2rem', lineHeight: 1.4 }}>
             {currentQuestion?.question}
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="grid-2" style={{ gap: '0.75rem' }}>
             {['A', 'B', 'C', 'D'].map(opt => (
               <button
                 key={opt}
                 className="btn glass"
                 onClick={() => setAnswers({ ...answers, [currentQuestion?.id]: opt })}
                 style={{
-                  padding: '1.5rem',
+                  padding: 'clamp(1rem, 4vw, 1.5rem)',
                   textAlign: 'left',
                   justifyContent: 'flex-start',
-                  fontSize: '1.1rem',
+                  fontSize: '1rem',
                   border: answers[currentQuestion?.id] === opt ? '2px solid var(--accent)' : '1px solid var(--glass-border)',
                   background: answers[currentQuestion?.id] === opt ? 'rgba(6, 182, 212, 0.1)' : 'rgba(255,255,255,0.02)',
                   color: 'white',
+                  width: '100%'
                 }}
               >
                 <span style={{ 
                   fontWeight: 700, 
-                  marginRight: '1rem',
+                  marginRight: '0.75rem',
                   background: answers[currentQuestion?.id] === opt ? 'var(--accent)' : 'var(--glass-border)',
                   color: answers[currentQuestion?.id] === opt ? 'var(--primary)' : 'var(--text-muted)',
-                  width: '32px',
-                  height: '32px',
+                  width: '28px',
+                  height: '28px',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: '8px'
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  flexShrink: 0
                 }}>
                   {opt}
                 </span>
-                {currentQuestion?.[`option${opt}`]}
+                <span style={{ flex: 1 }}>{currentQuestion?.[`option${opt}`]}</span>
               </button>
             ))}
           </div>
         </GlassCard>
 
-        <div className="flex justify-between" style={{ padding: '0 1rem' }}>
+        <div className="flex justify-between gap-4" style={{ padding: '0 0.5rem', marginBottom: '2rem' }}>
           <button
             className="btn btn-outline"
-            onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+            onClick={() => {
+              setCurrentIndex(prev => Math.max(0, prev - 1));
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             disabled={currentIndex === 0}
-            style={{ minWidth: '140px' }}
+            style={{ flex: 1 }}
           >
             ← Previous
           </button>
@@ -228,16 +236,19 @@ export default function ExamPage() {
               className="btn btn-primary"
               onClick={() => confirm('Submit your exam?') && handleSubmit()}
               disabled={loading}
-              style={{ minWidth: '160px', background: 'linear-gradient(to right, #06B6D4, #A855F7)', border: 'none' }}
+              style={{ flex: 1.5, background: 'linear-gradient(to right, #06B6D4, #A855F7)', border: 'none' }}
             >
               Final Submit 🚀
             </button>
           ) : (
             <button
               className="btn btn-outline"
-              onClick={() => setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))}
+              onClick={() => {
+                setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               disabled={currentIndex === questions.length - 1}
-              style={{ minWidth: '140px' }}
+              style={{ flex: 1 }}
             >
               Next →
             </button>
