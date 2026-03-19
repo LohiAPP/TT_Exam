@@ -246,8 +246,40 @@ export default function AdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', Icon: Icons.Dashboard },
     { id: 'exams', label: 'Exams', Icon: Icons.Exams },
     { id: 'questions', label: 'Questions', Icon: Icons.Questions },
-    { id: 'results', label: 'Results', Icon: Icons.Results }
+    { id: 'results', label: 'Results', Icon: Icons.Results },
+    { id: 'logout', label: 'Logout', Icon: Icons.Logout, isAction: true }
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminSession');
+    router.push('/admin/login');
+  };
+
+  const checkAuth = () => {
+    const sessionStr = localStorage.getItem('adminSession');
+    if (!sessionStr) {
+      router.push('/admin/login');
+      return false;
+    }
+    try {
+      const session = JSON.parse(sessionStr);
+      if (!session.isLoggedIn || session.expiry < Date.now()) {
+        localStorage.removeItem('adminSession');
+        router.push('/admin/login');
+        return false;
+      }
+      return true;
+    } catch {
+      router.push('/admin/login');
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (checkAuth()) {
+      fetchData();
+    }
+  }, [router]);
 
   if (loading) return <div className="container flex-center" style={{ minHeight: '80vh' }}>Loading Dashboard...</div>;
 
@@ -255,10 +287,10 @@ export default function AdminDashboard() {
     <>
       <nav className="mobile-nav-bar">
         {navItems.map(item => (
-          <div 
-            key={item.id} 
+          <div
+            key={item.id}
             className={`nav-icon ${activeTab === item.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(item.id)}
+            onClick={() => item.isAction ? handleLogout() : setActiveTab(item.id)}
           >
             <item.Icon active={activeTab === item.id} />
           </div>
@@ -268,8 +300,8 @@ export default function AdminDashboard() {
       <div className="admin-layout">
         <aside className="sidebar">
           <h2 style={{ color: 'var(--accent)', marginBottom: '2.5rem', paddingLeft: '1rem', background: 'linear-gradient(to right, #06B6D4, #A855F7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>Admin Panel</h2>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {navItems.map(item => (
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', height: 'calc(100vh - 120px)' }}>
+            {navItems.filter(i => !i.isAction).map(item => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
@@ -285,14 +317,18 @@ export default function AdminDashboard() {
                 <span style={{ marginLeft: '0.75rem' }}>{item.label}</span>
               </button>
             ))}
-            <button 
-              className="btn btn-outline" 
-              style={{ marginTop: 'auto', color: '#EF4444', borderColor: '#EF4444', justifyContent: 'flex-start' }}
-              onClick={() => { localStorage.removeItem('isAdminLoggedIn'); router.push('/admin/login'); }}
-            >
-               <Icons.Logout />
-               <span style={{ marginLeft: '0.75rem' }}>Logout</span>
-            </button>
+            
+            {navItems.filter(i => i.isAction).map(item => (
+              <button 
+                key={item.id}
+                className="btn btn-outline" 
+                style={{ marginTop: 'auto', color: '#EF4444', borderColor: '#EF4444', justifyContent: 'flex-start' }}
+                onClick={handleLogout}
+              >
+                 <item.Icon />
+                 <span style={{ marginLeft: '0.75rem' }}>{item.label}</span>
+              </button>
+            ))}
           </nav>
         </aside>
 

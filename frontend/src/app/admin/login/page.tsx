@@ -13,7 +13,11 @@ export default function LoginPage() {
     const password = form.password.trim();
     
     if (username === 'admin' && password === 'admin123') {
-      localStorage.setItem('isAdminLoggedIn', 'true');
+      const session = {
+        isLoggedIn: true,
+        expiry: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+      };
+      localStorage.setItem('adminSession', JSON.stringify(session));
       router.push('/admin');
     } else {
       alert('Invalid username or password.');
