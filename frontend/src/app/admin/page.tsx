@@ -63,7 +63,10 @@ export default function AdminDashboard() {
     id: '', score: 0, percentage: 0, timeTaken: 0, examId: ''
   });
 
+  const [tabLoading, setTabLoading] = useState(false);
+
   const fetchData = async () => {
+    setTabLoading(true);
     try {
       const [statsRes, examsRes] = await Promise.all([
         api.getDashboardStats(),
@@ -75,6 +78,7 @@ export default function AdminDashboard() {
       console.error('Failed to fetch admin data');
     } finally {
       setLoading(false);
+      setTabLoading(false);
     }
   };
 
@@ -144,9 +148,14 @@ export default function AdminDashboard() {
 
   // Question CRUD
   const fetchQuestions = async (examId: string) => {
-    const res = await api.getQuestions(examId);
-    if (res.success) setQuestions(res.data);
-    setSelectedExamId(examId);
+    setTabLoading(true);
+    try {
+      const res = await api.getQuestions(examId);
+      if (res.success) setQuestions(res.data);
+      setSelectedExamId(examId);
+    } finally {
+      setTabLoading(false);
+    }
   };
 
   const handleSaveQuestion = async (e: React.FormEvent) => {
@@ -204,9 +213,14 @@ export default function AdminDashboard() {
 
   // Result CRUD
   const fetchResults = async (examId: string) => {
-    const res = await api.getResults(examId);
-    if (res.success) setResults(res.data);
-    setSelectedExamId(examId);
+    setTabLoading(true);
+    try {
+      const res = await api.getResults(examId);
+      if (res.success) setResults(res.data);
+      setSelectedExamId(examId);
+    } finally {
+      setTabLoading(false);
+    }
   };
 
   const handleSaveResult = async (e: React.FormEvent) => {
@@ -276,10 +290,17 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (checkAuth()) {
-      fetchData();
+    const isAuthorized = checkAuth();
+    if (isAuthorized) {
+      if (activeTab === 'dashboard' || activeTab === 'exams') {
+        fetchData();
+      } else if (activeTab === 'questions' && selectedExamId) {
+        fetchQuestions(selectedExamId);
+      } else if (activeTab === 'results' && selectedExamId) {
+        fetchResults(selectedExamId);
+      }
     }
-  }, [router]);
+  }, [router, activeTab]);
 
   if (loading) return <div className="container flex-center" style={{ minHeight: '80vh' }}>Loading Dashboard...</div>;
 
@@ -332,7 +353,19 @@ export default function AdminDashboard() {
           </nav>
         </aside>
 
-        <main className="main-content" style={{ flex: 1, paddingBottom: '90px' }}>
+        <main className="main-content" style={{ flex: 1, paddingBottom: '90px', position: 'relative' }}>
+          {tabLoading && (
+            <div style={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              height: '3px', 
+              background: 'linear-gradient(to right, transparent, var(--accent), transparent)', 
+              width: '100%', 
+              zIndex: 10,
+              animation: 'shimmer 2s infinite linear'
+            }}></div>
+          )}
           {activeTab === 'dashboard' && (
             <div className="animate-fade">
               <h1 style={{ marginBottom: '2rem' }}>Dashboard Overview</h1>
