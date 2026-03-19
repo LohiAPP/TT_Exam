@@ -12,7 +12,7 @@ export default function LoginPage() {
     const username = form.username.trim();
     const password = form.password.trim();
     
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'TeachersTraining' && password === 'Teachers@123456') {
       const session = {
         isLoggedIn: true,
         expiry: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
