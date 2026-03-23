@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import api from '@/services/api';
 import { GlassCard } from '@/components/GlassCard';
+import { useModal } from '@/components/ModalContext';
 
 export default function ExamPage() {
   const { id: examId } = useParams();
@@ -14,6 +15,7 @@ export default function ExamPage() {
   const [timeLeft, setTimeLeft] = useState(3600);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const { showModal } = useModal();
 
   useEffect(() => {
     const savedUser = localStorage.getItem('examUser');
@@ -68,7 +70,13 @@ export default function ExamPage() {
         router.push('/result');
       }
     } catch (err) {
-      alert('Error submitting exam. Please check your connection.');
+      showModal({
+        title: 'Submission Error',
+        message: 'There was a problem submitting your exam. Please check your internet connection and try again.',
+        type: 'danger',
+        confirmLabel: 'Retry',
+        onConfirm: handleSubmit
+      });
     } finally {
       setLoading(false);
     }
@@ -155,7 +163,18 @@ export default function ExamPage() {
             }}>
               ⏱️ {formatTime(timeLeft)}
             </div>
-            <button className="btn btn-primary" style={{ padding: '0.5rem 1.5rem', flex: 1 }} onClick={() => confirm('Submit your exam?') && handleSubmit()} disabled={loading}>
+            <button 
+              className="btn btn-primary" 
+              style={{ padding: '0.5rem 1.5rem', flex: 1 }} 
+              onClick={() => showModal({
+                title: 'Submit Exam',
+                message: 'Are you sure you want to submit your exam now?',
+                type: 'confirm',
+                confirmLabel: 'Submit Now',
+                onConfirm: handleSubmit
+              })} 
+              disabled={loading}
+            >
               Submit
             </button>
           </div>
@@ -234,7 +253,13 @@ export default function ExamPage() {
           {currentIndex === questions.length - 1 ? (
             <button
               className="btn btn-primary"
-              onClick={() => confirm('Submit your exam?') && handleSubmit()}
+              onClick={() => showModal({
+                title: 'Final Submission',
+                message: 'You have reached the end of the exam. Do you want to submit your answers now?',
+                type: 'confirm',
+                confirmLabel: 'Final Submit',
+                onConfirm: handleSubmit
+              })}
               disabled={loading}
               style={{ flex: 1.5, background: 'linear-gradient(to right, #06B6D4, #A855F7)', border: 'none' }}
             >

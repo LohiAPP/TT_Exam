@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import { GlassCard } from '@/components/GlassCard';
+import { useModal } from '@/components/ModalContext';
 
 export default function Home() {
   const router = useRouter();
+  const { showModal } = useModal();
   const [showWelcome, setShowWelcome] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [exams, setExams] = useState<any[]>([]);
@@ -58,7 +60,11 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.phone.length < 10) {
-      alert('Phone Number must be at least 10 digits');
+      showModal({
+        title: 'Invalid Input',
+        message: 'Phone Number must be at least 10 digits.',
+        type: 'warning'
+      });
       return;
     }
 
@@ -68,10 +74,18 @@ export default function Home() {
         localStorage.setItem('examUser', JSON.stringify(response.data));
         router.push(`/exam/${formData.examId}`);
       } else {
-        alert(response.message);
+        showModal({
+          title: 'Enrollment Failed',
+          message: response.message || 'Could not start the exam.',
+          type: 'danger'
+        });
       }
     } catch (error: any) {
-      alert(error.message || 'Enrollment failed. Please try again.');
+      showModal({
+        title: 'Error',
+        message: error.message || 'Enrollment failed. Please try again.',
+        type: 'danger'
+      });
     }
   };
 

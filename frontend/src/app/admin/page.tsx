@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import { GlassCard } from '@/components/GlassCard';
+import { useAdminModal } from './context/AdminModalContext';
 
 // SVG Icons
 const Icons = {
@@ -35,6 +36,7 @@ const formatForInput = (dateStr: string) => {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { showModal } = useAdminModal();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalUsers: 0, totalAttempts: 0, activeExams: 0 });
@@ -113,7 +115,11 @@ export default function AdminDashboard() {
         setExamFormData({ id: '', title: '', examId: '', duration: 60, startTime: '', endTime: '', totalQuestions: 10, isActive: true });
       }
     } catch (err: any) {
-      alert(err.message || 'Operation failed');
+      showModal({
+        title: 'Save Failed',
+        message: err.message || 'There was an error saving the exam.',
+        variant: 'danger'
+      });
     }
   };
 
@@ -133,18 +139,31 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteExam = async (id: string) => {
-    if (confirm('Are you sure you want to delete this exam? All related questions and results will be lost.')) {
-      try {
-        const res = await api.deleteExam(id);
-        if (res.success) {
-          await fetchData();
-        } else {
-          alert('Failed to delete exam');
+    showModal({
+      title: 'Delete Exam',
+      message: 'Are you sure you want to delete this exam? All related questions and results will be lost.',
+      variant: 'danger',
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        { 
+          label: 'Delete', 
+          variant: 'danger', 
+          onClick: async () => {
+            try {
+              const res = await api.deleteExam(id);
+              if (res.success) {
+                await fetchData();
+                showModal({ title: 'Deleted', message: 'Exam deleted successfully.', variant: 'info' });
+              } else {
+                showModal({ title: 'Error', message: 'Failed to delete exam.', variant: 'danger' });
+              }
+            } catch (err: any) {
+              showModal({ title: 'Error', message: err.message || 'Delete failed', variant: 'danger' });
+            }
+          } 
         }
-      } catch (err: any) {
-        alert(err.message || 'Delete failed');
-      }
-    }
+      ]
+    });
   };
 
   // Question CRUD
@@ -172,42 +191,71 @@ export default function AdminDashboard() {
         setQuestionFormData({ id: '', examId: questionFormData.examId, question: '', optionA: '', optionB: '', optionC: '', optionD: '', correct: 'A' });
       }
     } catch (err: any) {
-      alert(err.message || 'Save failed');
+      showModal({
+        title: 'Save Failed',
+        message: err.message || 'There was an error saving the question.',
+        variant: 'danger'
+      });
     }
   };
 
   const handleDeleteQuestion = async (id: string, examId: string) => {
-    if (confirm('Delete this question?')) {
-      try {
-        const res = await api.deleteQuestion(id);
-        if (res.success) {
-          await fetchQuestions(examId);
-          setSelectedQuestionIds(prev => prev.filter(i => i !== id));
-        } else {
-          alert('Delete failed');
+    showModal({
+      title: 'Delete Question',
+      message: 'Are you sure you want to delete this question?',
+      variant: 'danger',
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        {
+          label: 'Delete',
+          variant: 'danger',
+          onClick: async () => {
+            try {
+              const res = await api.deleteQuestion(id);
+              if (res.success) {
+                await fetchQuestions(examId);
+                setSelectedQuestionIds(prev => prev.filter(i => i !== id));
+              } else {
+                showModal({ title: 'Error', message: 'Delete failed', variant: 'danger' });
+              }
+            } catch (err: any) {
+              showModal({ title: 'Error', message: err.message || 'Error occurred', variant: 'danger' });
+            }
+          }
         }
-      } catch (err: any) {
-        alert(err.message || 'Error occurred');
-      }
-    }
+      ]
+    });
   };
 
   const handleBulkDelete = async () => {
     if (selectedQuestionIds.length === 0) return;
-    if (confirm(`Are you sure you want to delete ${selectedQuestionIds.length} questions?`)) {
-      setTabLoading(true);
-      try {
-        const res = await api.bulkDeleteQuestions(selectedQuestionIds);
-        if (res.success) {
-          await fetchQuestions(selectedExamId);
-          setSelectedQuestionIds([]);
+    showModal({
+      title: 'Bulk Delete',
+      message: `Are you sure you want to delete ${selectedQuestionIds.length} questions?`,
+      variant: 'danger',
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        {
+          label: 'Delete All',
+          variant: 'danger',
+          onClick: async () => {
+            setTabLoading(true);
+            try {
+              const res = await api.bulkDeleteQuestions(selectedQuestionIds);
+              if (res.success) {
+                await fetchQuestions(selectedExamId);
+                setSelectedQuestionIds([]);
+                showModal({ title: 'Deleted', message: 'Questions deleted successfully.', variant: 'info' });
+              }
+            } catch (err: any) {
+              showModal({ title: 'Error', message: err.message || 'Bulk delete failed', variant: 'danger' });
+            } finally {
+              setTabLoading(false);
+            }
+          }
         }
-      } catch (err: any) {
-        alert(err.message || 'Bulk delete failed');
-      } finally {
-        setTabLoading(false);
-      }
-    }
+      ]
+    });
   };
 
   const toggleSelectAll = () => {
@@ -232,13 +280,13 @@ export default function AdminDashboard() {
     try {
       const res = await api.importQuestions(selectedExamId, file);
       if (res.success) {
-        alert(res.message);
+        showModal({ title: 'Import Successful', message: res.message, variant: 'info' });
         await fetchQuestions(selectedExamId);
       } else {
-        alert(res.message);
+        showModal({ title: 'Import Failed', message: res.message, variant: 'danger' });
       }
     } catch (err) {
-      alert('Failed to import questions');
+      showModal({ title: 'Error', message: 'Failed to import questions. Please check the file format.', variant: 'danger' });
     } finally {
       setImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -264,25 +312,39 @@ export default function AdminDashboard() {
       if (res.success) {
         setShowResultForm(false);
         await fetchResults(resultFormData.examId);
+        showModal({ title: 'Updated', message: 'Result updated successfully.', variant: 'info' });
       }
     } catch (err: any) {
-      alert(err.message || 'Update failed');
+      showModal({ title: 'Error', message: err.message || 'Update failed', variant: 'danger' });
     }
   };
 
   const handleDeleteResult = async (id: string, examId: string) => {
-    if (confirm('Delete this result? This action cannot be undone.')) {
-      try {
-        const res = await api.deleteResult(id);
-        if (res.success) {
-          await fetchResults(examId);
-        } else {
-          alert('Delete failed');
+    showModal({
+      title: 'Delete Result',
+      message: 'Are you sure you want to delete this result? This action cannot be undone.',
+      variant: 'danger',
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        {
+          label: 'Delete',
+          variant: 'danger',
+          onClick: async () => {
+            try {
+              const res = await api.deleteResult(id);
+              if (res.success) {
+                await fetchResults(examId);
+                showModal({ title: 'Deleted', message: 'Result deleted successfully.', variant: 'info' });
+              } else {
+                showModal({ title: 'Error', message: 'Delete failed', variant: 'danger' });
+              }
+            } catch (err: any) {
+              showModal({ title: 'Error', message: err.message || 'Error occurred', variant: 'danger' });
+            }
+          }
         }
-      } catch (err: any) {
-        alert(err.message || 'Error occurred');
-      }
-    }
+      ]
+    });
   };
 
   const handleExport = () => {

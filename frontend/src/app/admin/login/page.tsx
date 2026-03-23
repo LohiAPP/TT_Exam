@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAdminModal } from '../context/AdminModalContext';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const { showModal } = useAdminModal();
   const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -21,7 +23,11 @@ export default function LoginPage() {
       localStorage.setItem('adminSession', JSON.stringify(session));
       router.push('/admin');
     } else {
-      alert('Invalid username or password.');
+      showModal({
+        title: 'Login Failed',
+        message: 'Invalid username or password.',
+        variant: 'danger'
+      });
     }
   };
 

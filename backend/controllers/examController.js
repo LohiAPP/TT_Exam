@@ -119,7 +119,8 @@ const submitExam = async (req, res) => {
       data: {
         score,
         total: questions.length,
-        percentage
+        percentage,
+        questions: questions // Returning questions with correct answers for review
       }
     });
   } catch (error) {
